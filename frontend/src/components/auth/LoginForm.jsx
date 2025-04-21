@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import { Link } from "react-router-dom";
+import axios from 'axios';
 
 const LoginForm = () =>{
     const [formData, setFormData] =  useState ({
@@ -11,67 +13,63 @@ const LoginForm = () =>{
     const [showPassword, setShowPassword] = useState(false);
 
     const handleChange = (e) =>{
-        const {name,value} = e.target;
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
+      const {name,value} = e.target;
+      setFormData({
+          ...formData,
+          [name]: value,
+      });
 
-        if(errors[name]){
-            setErrors({
-                ...errors,
-                [name]:'',
-            });
-        }
+      if(errors[name]){
+          setErrors({
+              ...errors,
+              [name]:'',
+          });
+      }
     };
 
     const validate = () =>{
-        const newErrors = {};
+      const newErrors = {};
 
-        //email validation
-        if (!formData.email){
-            newErrors.email = 'Email is required';
-        }else if(!/\S+@\S+\.\S+/.test(formData.email)){
-            newErrors.email = 'Email address is invalid';
-        }
+      //email validation
+      if (!formData.email){
+          newErrors.email = 'Email is required';
+      }else if(!/\S+@\S+\.\S+/.test(formData.email)){
+          newErrors.email = 'Email address is invalid';
+      }
 
-        //password validation
-        if(!formData.password){
-            newErrors.password = 'Password is required';
-        }else if(formData.password.length < 6){
-            newErrors.password = 'Password must be at least 6 characters';
-        }
+      //password validation
+      if(!formData.password){
+          newErrors.password = 'Password is required';
+      }else if(formData.password.length < 6){
+          newErrors.password = 'Password must be at least 6 characters';
+      }
 
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        if (!validate()) return;
-        
-        setIsLoading(true);
-        
-        try {
-          // Replace this with your actual API call
-          // const response = await authService.login(formData);
-          console.log('Logging in with:', formData);
-          
-          // Simulate API delay
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          // Handle successful login
-          // Example: saveToken(response.token);
-          // Example: navigate('/dashboard');
-          
-        } catch (error) {
-          setErrors({ 
-            form: error.message || 'Login failed. Please try again.' 
-          });
-        } finally {
-          setIsLoading(false);
-        }
+      e.preventDefault();
+      
+      if (!validate()) return;
+      
+      setIsLoading(true);
+      
+      try {
+        const {data} = await axios.post('http://localhost:5000/api/auth/login',formData);
+
+        // console.log('Login successful:', data);
+
+        localStorage.setItem('token', data.token);
+        axios.defaults.headers.common['x-auth-token'] = data.token;
+
+      } catch (error) {
+        setErrors({ 
+          form: error.response?.data?.error || 'Login failed. Please try again.' 
+        });
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     return(
@@ -162,9 +160,9 @@ const LoginForm = () =>{
               </label>
             </div>
             <div>
-              <a href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800">
+              <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800">
                 Forgot password?
-              </a>
+              </Link>
             </div>
           </div>
           
@@ -173,7 +171,7 @@ const LoginForm = () =>{
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out"
+              className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out cursor-pointer disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center">
@@ -193,9 +191,9 @@ const LoginForm = () =>{
         {/* Registration Link */}
         <p className="mt-6 text-center text-sm text-gray-600">
           Don't have an account?{' '}
-          <a href="/register" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     );
