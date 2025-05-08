@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }) => {
             headers: { "x-auth-token": token },
           });
           setUser(res.data.user);
+          localStorage.setItem("user", JSON.stringify(res.data.user));
         }
       } catch (error) {
         console.error("Authentication error:", error);
@@ -34,6 +35,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (credentials) => {
+    setLoading(true);
     try {
       const res = await axios.post(
         "http://localhost:5000/api/auth/login",
@@ -41,16 +43,22 @@ export const AuthProvider = ({ children }) => {
         { withCredentials: true }
       );
       localStorage.setItem("token", res.data.token);
-      setUser(res.data);
+      setUser(res.data.user); // Set the user state with the response data
+      axios.defaults.headers.common["x-auth-token"] = res.data.token;
+      return true; // Return true on successful login
     } catch (error) {
       console.error("Login error:", error);
+      return false; // Return false on login failure
+    } finally {
+      setLoading(false);
     }
   };
 
   const logout = async () => {
     try {
       await axios.post("http://localhost:5000/api/auth/logout", {}, {
-        withCredentials: true
+        withCredentials: true,
+        headers: { "x-auth-token": getAuthToken() },
       });
       localStorage.removeItem("token");
       setUser(null);

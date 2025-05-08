@@ -96,6 +96,7 @@ exports.logout = (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
 // Get current user profile
 exports.getCurrentUser = async (req, res) => {
   try {

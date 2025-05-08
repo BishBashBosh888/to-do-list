@@ -1,10 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
 import Home from './pages/HomePage';
 import Login from './pages/LoginPage';
 import Register from './pages/RegisterPage';
-import RequireAuth from './components/auth/RequireAuth';
-import UnauthenticatedRoute from './components/auth/UnauthenticatedRoute';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 // import NotFound from './pages/NotFound'
 
 function App() {
@@ -12,19 +10,19 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path='/' element={
-          <RequireAuth>
+          <ProtectedRoute requireAuth={true}>
             <Home/>
-          </RequireAuth>
+          </ProtectedRoute>
           }/>
         <Route path='/login' element={
-          <UnauthenticatedRoute>
+          <ProtectedRoute requireAuth={false}>
             <Login/>
-          </UnauthenticatedRoute>
+          </ProtectedRoute>
           }/>
         <Route path='/register' element={
-          <UnauthenticatedRoute>
+          <ProtectedRoute requireAuth={false}>
             <Register/>
-          </UnauthenticatedRoute>
+          </ProtectedRoute>
         }/>
         {/* <Route path='*' element={<NotFound/>}/> */}
       </Routes>
