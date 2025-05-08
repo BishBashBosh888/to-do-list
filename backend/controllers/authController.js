@@ -71,7 +71,13 @@ exports.login = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRATION },
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        res.json({ token,
+          user:{
+            id: user.id,
+            name: user.name,
+            email:user.email,
+          }
+         });
       }
     );
     
@@ -81,14 +87,15 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.forgotPassword = async(req,res) =>{
-  try{
-
-  }catch(error){
-
+exports.logout = (req, res) => {
+  try {
+    res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (error) {
+    console.error('Error during logout:', error);
+    res.status(500).json({ error: 'Server error' });
   }
-}
-
+};
 // Get current user profile
 exports.getCurrentUser = async (req, res) => {
   try {
@@ -96,7 +103,7 @@ exports.getCurrentUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    res.status(200).json(user);
+    res.status(200).json({user});
   } catch (error) {
     console.error('Error getting user profile:', error);
     res.status(500).json({ error: 'Server error' });

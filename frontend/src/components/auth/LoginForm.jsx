@@ -58,7 +58,7 @@ const LoginForm = () =>{
       try {
         const {data} = await axios.post('http://localhost:5000/api/auth/login',formData);
 
-        // console.log('Login successful:', data);
+        console.log('Login successful:', data.name);
 
         localStorage.setItem('token', data.token);
         axios.defaults.headers.common['x-auth-token'] = data.token;
