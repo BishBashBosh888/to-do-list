@@ -42,13 +42,48 @@ export const AuthProvider = ({ children }) => {
         credentials,
         { withCredentials: true }
       );
+      // Store authentication data
       localStorage.setItem("token", res.data.token);
-      setUser(res.data.user); // Set the user state with the response data
       axios.defaults.headers.common["x-auth-token"] = res.data.token;
-      return true; // Return true on successful login
+      
+      // Store user data
+      setUser(res.data.user);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      return true;
     } catch (error) {
       console.error("Login error:", error);
-      return false; // Return false on login failure
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const register = async (userData) => {
+    setLoading(true);
+    try {
+      console.log("Making registration request...");
+      
+      const res = await axios.post(
+        "http://localhost:5000/api/auth/register",
+        userData,
+        { withCredentials: true }
+      );
+
+      console.log("Registration response:", res.data);
+
+      // Store authentication data
+      localStorage.setItem("token", res.data.token);
+      axios.defaults.headers.common["x-auth-token"] = res.data.token;
+      
+      // Store user data
+      setUser(res.data.user);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      return true;
+    } catch (error) {
+      console.error("Registration error:", error.response?.data || error.message);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -69,7 +104,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, register, loading }}>
       {children}
     </AuthContext.Provider>
   );

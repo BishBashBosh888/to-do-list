@@ -1,13 +1,14 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 const ProtectedRoute = ({ children, requireAuth = true, redirectTo = "/" }) => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("protected route", user, loading);
+    // console.log("protected route", user, loading);
     if (!loading) {
       if (requireAuth && !user) {
         console.log("redirecting to login");
@@ -20,7 +21,7 @@ const ProtectedRoute = ({ children, requireAuth = true, redirectTo = "/" }) => {
   }, [user, loading, navigate, requireAuth, redirectTo]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner/>
   }
 
   // If the user is authenticated and the route is protected, render the children

@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { FiUser, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const RegisterForm = () => {
+  const navigate = useNavigate();
+  const { register } = useAuth();
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -67,18 +70,37 @@ const RegisterForm = () => {
     e.preventDefault();
     
     if (!validate()) return;
+
+    // console.log("Form data being sent:", formData);
     
     setIsLoading(true);
     
     try {
-        const {data} = await axios.post('http://localhost:5000/api/auth/register',formData);
-        localStorage.setItem('token', data.token);
-        axios.defaults.headers.common['x-auth-token'] = data.token;
+      console.log("Starting registration process...");
+      const success = await register(formData);
       
+      if (success) {
+        console.log("Registration successful, navigating to home...");
+        navigate('/', { replace: true });
+      }
     } catch (error) {
-      setErrors({ 
-        form: error.message || 'Registration failed. Please try again.' 
-      });
+      console.error("Registration error:", error);
+      const serverErrors = error.response?.data?.errors;
+      
+      if (serverErrors) {
+        // Handle validation errors from the server
+        const newErrors = {};
+        serverErrors.forEach(err => {
+          newErrors[err.param] = err.msg;
+        });
+        setErrors(newErrors);
+      } else {
+        // Handle general error
+        setErrors({ 
+          form: error.response?.data?.error || 
+                'Registration failed. Please try again.' 
+        });
+      }
     } finally {
       setIsLoading(false);
     }
